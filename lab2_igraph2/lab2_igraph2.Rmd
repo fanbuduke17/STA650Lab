@@ -255,7 +255,7 @@ plot(got2,edge.arrow.size=.5, vertex.color="gold", vertex.size=3,
 
 ```
 
-## get dataframe, matrix or adgelist from igraph object
+## get dataframe, matrix or edgelist from igraph object
 
 ```{r,echo=TRUE}
 igraph::as_data_frame(got2)%>%head(2)
@@ -333,7 +333,8 @@ familynames[familynames=="(guard)"]="None"
 # add vertices attributes
 V(got2)$familyname=familynames
 V(got2)$fullname=fullnames
-V(got2)$name=nameshort # first name
+firstnames=fullnames%>%str_split("-",simplify = TRUE)%>%.[,1]
+V(got2)$name=firstnames # first name
 ```
 
 ---
@@ -356,7 +357,7 @@ V(got2)$color=vcol
 V(got2)$size=degree(got2)%>%log()*4
 E(got2)$width=E(got2)$weight%>%log()/2
 plot(got2, vertex.label.color="black", 
-     vertex.label.cex=.5, vertex.label.dist=2, edge.curved=0.5,layout=layout_with_kk)
+     vertex.label.cex=.5, vertex.label.dist=1, edge.curved=0.5,layout=layout_with_dh)
 legend("right", legend = c("Stark","Lannister","Other"), pch=21,
        col=c("tomato","gold","gray50"), pt.bg=c("tomato","gold","gray50"), pt.cex=1, cex=.8, bty="n", ncol=1)
 
@@ -366,7 +367,7 @@ legend("right", legend = c("Stark","Lannister","Other"), pch=21,
 
 Plot only labels of the nodes
 
-```{r}
+```{r,echo=TRUE}
 plot(got2, vertex.shape="none",vertex.label.color="black", 
      vertex.label.cex=.5, vertex.label.dist=2, edge.curved=0.5,layout=layout_with_kk)
 ```
@@ -428,6 +429,11 @@ Without label and color the edge.
 set.seed(2)
 plot(got2, vertex.shape="none",vertex.label.color="black", 
      vertex.label.cex=.5,vertex.label.dist=0.2, edge.curved=0.5,layout=layout_with_dh)
+```
+
+---
+
+```{r,echo=TRUE}
 ##color the edge
 got2
 ecol=rep("gray50",ecount(got2))
@@ -584,14 +590,25 @@ centr_eigen(got2, directed=F, normalized=T) $vector%>%sort(decreasing = TRUE)%>%
 
 --- 
 
-Betweenness (centrality based on a broker position connecting others)
-(Number of geodesics that pass through the node or the edge)
+Betweenness 
+
+The betweenness centrality for each vertex is the number of these shortest paths that pass through the vertex.
 
 ```{r,echo=TRUE}
 betweenness(got2, directed=F, weights=NA)%>%sort(decreasing = TRUE)%>%.[1:5]
 betweenness(got2, directed=F)%>%sort(decreasing = TRUE)%>%.[1:5]
-edge_betweenness(got2, directed=F, weights=NA)%>%sort(decreasing = TRUE)%>%.[1:5]
 centr_betw(got2, directed=F, normalized=T)$res%>%sort(decreasing = TRUE)%>%.[1:5]
+
+```
+
+---
+
+The edge betweenness centrality is defined as the number of the shortest paths that go through an **edge** in a graph or network. (result will be different from `betweenness`)
+
+```{r,echo=TRUE}
+ecount(got2)
+vcount(got2)
+edge_betweenness(got2, directed=F, weights=NA)
 
 ```
 
